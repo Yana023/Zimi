@@ -15,6 +15,16 @@ h1 {
     font-size: 1em;
 }
 
+.panel {
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+#code_panel {
+    background-color: #eee;
+    margin-top: 140px;
+    display: inline-block;
+}
+
 #text_box {
     /*border: solid 1px #fda;*/
     font-size: 76px;
