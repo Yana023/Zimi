@@ -1,6 +1,47 @@
 @charset "utf-8";
 
-.size_sample1 {
-    font-size: 20mm;
-    writing-mode: vertical-lr;
+/* color set.
+
+  #9de
+  #9ae
+  #fea
+  #fda
+
+  src: http://paletton.com/#uid=73n0v0kbMQN1N+D6SX6gfHWkhx6
+
+*/
+
+h1 {
+    font-size: 1em;
+}
+
+#text_box {
+    /*border: solid 1px #fda;*/
+    font-size: 76px;
+    color: #000;
+    background-color: rgba(0,0,0,0);
+    position: absolute;
+    top: 36px;
+    left: 20px;
+    /*writing-mode: vertical-lr;*/
+    /*line-height: 1em;*/
+    min-height: 76px;
+    min-width: 304px;
+    z-index: 2;
+}
+
+#ruled_line {
+    /*border: solid 1px #9de;*/
+    color: #9de;
+    background-color: #fff;
+    position: absolute;
+    top: 36px;
+    left: 20px;
+    z-index: 1;
+}
+
+#ruler {
+    visibility: hidden;
+    position: absolute;
+    white-space: nowrap;
 }
