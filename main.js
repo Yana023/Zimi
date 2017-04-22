@@ -9,8 +9,12 @@ var SettingClass = function (font, size) {
     this.size = size;
     this.style = [5, 5];
     this.color = '#9de';
-    this.offset_x = 0;
-    this.offset_y = size / 4; // line-height: 1.5em
+    this.offset_x = function () {
+        throw "Not Implements.";
+    }
+    this.offset_y = function() {
+        return this.size / 4; // line-height: 1.5em
+    }
 }
 
 function changeTextEvent() {
@@ -47,7 +51,7 @@ function drawLine(x1, y1, x2, y2, line_color, line_style) {
 
 function drawRuledLines(text) {
     ruled_line.width = setting.size * text.length;
-    ruled_line.height = setting.size + setting.offset_y;
+    ruled_line.height = setting.size + setting.offset_y();
 
     text_width = measure(text);
     console.log("Text.width: " + text_width);
@@ -55,7 +59,7 @@ function drawRuledLines(text) {
     text.split('').forEach(function (val) {
         var c_width = measure(val);
         var x = x_cursor + c_width / 2;
-        drawLine(x, setting.offset_y, x, setting.offset_y + setting.size);
+        drawLine(x, setting.offset_y(), x, setting.offset_y() + setting.size);
 
         //// one charactor area.
         // canvas.beginPath();
@@ -67,7 +71,7 @@ function drawRuledLines(text) {
         x_cursor += c_width;
     });
 
-    var y = setting.size / 2 + setting.offset_y;
+    var y = setting.size / 2 + setting.offset_y();
     drawLine(0, y, text_width, y)
 }
 
@@ -142,5 +146,3 @@ if (args['f'] != null) {
 applyToHTML(setting);
 text_box.addEventListener("input", changeTextEvent);
 changeTextEvent();
-
-// document.getElementById('moge').style.fontSize = "xx-large";
