@@ -101,7 +101,22 @@ function writeHexCode(str) {
 function applyToHTML(setting) {
     console.dir(text_box);
     console.log(setting.size);
-    text_box.style.fontSize = setting.size; // ('-';)?
+    text_box.style.fontSize = setting.size + "px"; // ('-';)?
+    code_panel.style.marginTop = (setting.size + 34) + "px"; // 110-76
+}
+
+// src: http://apr20.net/web/jquery/2215/
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
 }
 
 console.log("debug! ('-',,)");
@@ -110,8 +125,22 @@ console.log("debug! ('-',,)");
 // console.dirxml(text_box);
 // console.dir(canvas.textBaseline);
 
-var setting = new SettingClass('sans-serif', 76);
+var setting = new SettingClass('sans-serif', 120);
 // console.dir(setting);
+var args = getUrlVars();
+if (args['s'] != null) {
+    text_box.textContent = decodeURI(args['s']);
+}
+if (args['f'] != null) {
+    var tmp_size = parseInt(args['f']);
+    if (40 < tmp_size && tmp_size < 600) {
+        setting.size = tmp_size;
+    } else {
+        console.warn("InvalidArguments: " + tmp_size);
+    }
+}
 applyToHTML(setting);
 text_box.addEventListener("input", changeTextEvent);
 changeTextEvent();
+
+// document.getElementById('moge').style.fontSize = "xx-large";
