@@ -1,4 +1,3 @@
-
 var text_box = document.getElementById('text_box');
 var ruled_line = document.getElementById('ruled_line');
 var code_panel = document.getElementById('code_panel');
@@ -15,6 +14,7 @@ var SettingClass = function (font, size) {
     this.offset_y = function() {
         return this.size / 4; // line-height: 1.5em
     }
+    this.isReverse = false;
 }
 
 function changeTextEvent() {
@@ -95,7 +95,7 @@ function writeHexCode(str) {
     if (typeof str != "string") {
         throw "ArgumentError.";
     }
-    var hex_str = "HEX: "
+    var hex_str = "utf-16: "
     str.split('').forEach(function (val) {
         hex_str += val.charCodeAt(0).toString(16) + ", ";
     });
@@ -106,7 +106,7 @@ function applyToHTML(setting) {
     console.dir(text_box);
     console.log(setting.size);
     text_box.style.fontSize = setting.size + "px"; // ('-';)?
-    code_panel.style.marginTop = (setting.size + 34) + "px"; // 110-76
+    code_panel.style.marginTop = (setting.size - 76) + "px"; // 110-76
 }
 
 // src: http://apr20.net/web/jquery/2215/
@@ -123,11 +123,42 @@ function getUrlVars()
     return vars;
 }
 
+function reverse() {
+    if (setting.isReverse) {
+        text_box.style.transform = "";
+    } else {
+        text_box.style.transform = "matrix(-1,0,0,1,0,0)";
+    }
+    setting.isReverse = !setting.isReverse;
+}
+
+function copyurl(e) {
+    var word = text_box.textContent;
+    var font_size = setting.size;
+    var domain = "https://yana.honifuwa.com/develop/zimi/?";
+    var url = domain + "s=" + encodeURI(word) + "&f=" + font_size;
+    try {
+        e.preventDefault();
+        e.clipboardData.setData('text/plain', url);
+    }
+    catch (ex) {
+        console.warn(ex);
+        alert(url);
+    } 
+    console.log("Copy: " + url);
+}
+
+function alldirections() {
+
+}
+
 console.log("debug! ('-',,)");
 // console.dir(text_box);
 // console.dir(canvas);
 // console.dirxml(text_box);
 // console.dir(canvas.textBaseline);
+
+document.addEventListener('copy', copyurl);
 
 var setting = new SettingClass('sans-serif', 120);
 // console.dir(setting);

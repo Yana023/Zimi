@@ -1,14 +1,30 @@
 <!DOCTYPE html>
 
+<!-- Zimi v1.2 -->
+
 <title>Zimi</title>
 <meta charset='utf-8'/>
 <link rel=stylesheet href=style.css>
 
-<h1>Zimi</h1>
-<!-- Zimi v1.1 -->
+<div class=header>
+    <h1>Zimi</h1>
+    <!--<select class=selector>
+        <option value="">75px</option>
+    </select>
+    <select class=selector>
+        <option value="">sans-serif</option>
+    </select>-->
+    <ul class=menu>
+        <li class=menu-list onclick="copyurl()">CopyURL</li>
+        <li class=menu-list onclick="reverse()">反転</li>
+    </ul>
+</div>
 
-<div id=text_box contenteditable=true>ほにふわフレンズ！</div>
-<canvas id=ruled_line width="304" height="114"></canvas>
+<div class=box>
+    <div id=text_box contenteditable=true>ほにふわフレンズ！</div>
+    <canvas id=ruled_line width="304" height="114"></canvas>
+
+</div>
 
 <div id=code_panel class=panel>
     <!--test sample: -->
