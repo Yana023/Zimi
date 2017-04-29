@@ -1,6 +1,8 @@
 var text_box = document.getElementById('text_box');
 var ruled_line = document.getElementById('ruled_line');
 var code_panel = document.getElementById('code_panel');
+var font_size = document.getElementById('font_size');
+var font_style = document.getElementById('font_style');
 var canvas = ruled_line.getContext('2d');
 
 var SettingClass = function (font, size) {
@@ -8,12 +10,6 @@ var SettingClass = function (font, size) {
     this.size = size;
     this.style = [5, 5];
     this.color = '#9de';
-    this.offset_x = function () {
-        throw "Not Implements.";
-    }
-    this.offset_y = function() {
-        return this.size / 4; // line-height: 1.5em
-    }
     this.isReverse = false;
 }
 
@@ -29,7 +25,6 @@ function changeTextEvent() {
 }
 
 function clear() {
-    // console.log(console.trace());
     canvas.clearRect(0, 0, ruled_line.width, ruled_line.height);
 }
 
@@ -50,16 +45,14 @@ function drawLine(x1, y1, x2, y2, line_color, line_style) {
 }
 
 function drawRuledLines(text) {
-    ruled_line.width = setting.size * text.length;
-    ruled_line.height = setting.size + setting.offset_y();
+    ruled_line.width = measure(text);
+    ruled_line.height = text_box.clientHeight;
 
-    text_width = measure(text);
-    console.log("Text.width: " + text_width);
     var x_cursor = 0;
     text.split('').forEach(function (val) {
         var c_width = measure(val);
         var x = x_cursor + c_width / 2;
-        drawLine(x, setting.offset_y(), x, setting.offset_y() + setting.size);
+        drawLine(x, 0, x, ruled_line.height);
 
         //// one charactor area.
         // canvas.beginPath();
@@ -71,8 +64,8 @@ function drawRuledLines(text) {
         x_cursor += c_width;
     });
 
-    var y = setting.size / 2 + setting.offset_y();
-    drawLine(0, y, text_width, y)
+    var y = ruled_line.height / 2;
+    drawLine(0, y, ruled_line.width, y)
 }
 
 function measure(str, font, font_size) {
@@ -104,9 +97,11 @@ function writeHexCode(str) {
 
 function applyToHTML(setting) {
     console.dir(text_box);
-    console.log(setting.size);
+    console.log(setting);
     text_box.style.fontSize = setting.size + "px"; // ('-';)?
     code_panel.style.marginTop = (setting.size - 76) + "px"; // 110-76
+    text_box.style.fontFamily = setting.font;
+    text_box.style.lineHeight = setting.size + "px";
 }
 
 // src: http://apr20.net/web/jquery/2215/
@@ -134,9 +129,8 @@ function reverse() {
 
 function copyurl(e) {
     var word = text_box.textContent;
-    var font_size = setting.size;
     var domain = "https://yana.honifuwa.com/develop/zimi/?";
-    var url = domain + "s=" + encodeURI(word) + "&f=" + font_size;
+    var url = domain + "s=" + encodeURI(word) + "&f=" + setting.size;
     try {
         e.preventDefault();
         e.clipboardData.setData('text/plain', url);
@@ -152,6 +146,19 @@ function alldirections() {
 
 }
 
+function changeFontSize() {
+    console.log("font_size.value= " + font_size.value);
+    setting.size = parseInt(font_size.value);
+    applyToHTML(setting);
+    changeTextEvent();
+}
+
+function changeFontStyle() {
+    setting.font = font_style.value;
+    applyToHTML(setting);
+    changeTextEvent();
+}
+
 console.log("debug! ('-',,)");
 // console.dir(text_box);
 // console.dir(canvas);
@@ -160,7 +167,7 @@ console.log("debug! ('-',,)");
 
 document.addEventListener('copy', copyurl);
 
-var setting = new SettingClass('sans-serif', 120);
+var setting = new SettingClass('sans-serif', 75);
 // console.dir(setting);
 var args = getUrlVars();
 if (args['s'] != null) {
@@ -168,7 +175,7 @@ if (args['s'] != null) {
 }
 if (args['f'] != null) {
     var tmp_size = parseInt(args['f']);
-    if (40 < tmp_size && tmp_size < 600) {
+    if (40 <= tmp_size && tmp_size <= 200) {
         setting.size = tmp_size;
     } else {
         console.warn("InvalidArguments: " + tmp_size);

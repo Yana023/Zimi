@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 
-<!-- Zimi v1.2 -->
+<!-- Zimi v1.3 -->
 
 <title>Zimi</title>
 <meta charset='utf-8'/>
 <link rel=stylesheet href=style.css>
+<link href="https://fonts.googleapis.com/css?family=Arvo|Open+Sans" rel="stylesheet">
 
 <div class=header>
     <h1>Zimi</h1>
-    <!--<select class=selector>
-        <option value="">75px</option>
+    <select id=font_size class=selector onchange="changeFontSize()">
+        <option value=75>75px</option>
+        <option value=100>100px</option>
+        <option value=200>200px</option>
     </select>
-    <select class=selector>
-        <option value="">sans-serif</option>
-    </select>-->
+    <select id=font_style class=selector onchange="changeFontStyle()">
+        <option value="sans-serif">sans-serif</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Meiryo">メイリオ</option>
+        <option value="MS Gothic">MS ゴシック</option>
+        <option value="Arvo">Arvo</option>
+    </select>
     <ul class=menu>
         <li class=menu-list onclick="copyurl()">CopyURL</li>
         <li class=menu-list onclick="reverse()">反転</li>
@@ -27,14 +34,10 @@
 </div>
 
 <div id=code_panel class=panel>
-    <!--test sample: -->
-    <!--簡素実用-->
-    <!--HEX: HEX: 7c21, 7d20, 5b9f, 7528,-->
 </div>
 
 <div class=panel>
-    <p>文字をよく見るためだけの何かです。拡大鏡代わりにどうぞ...</p>
-    <!--おまけ: ?s=honifuwa&f=200-->
+    <p>文字をよく見るためだけの何かです。</p>
 </div>
 
 <script src=main.js></script>
