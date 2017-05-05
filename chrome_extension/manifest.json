@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Zimi",
+  "description": "検索エンジンにZimiを追加する拡張です。",
+  "version": "1.0",
+  "chrome_settings_overrides": {
+    "search_provider": {
+        "name": "Zimi(字見)",
+        "keyword": "zimi",
+        "search_url": "https://yana.honifuwa.com/develop/zimi/?s={searchTerms}",
+        "favicon_url": "https://yana.honifuwa.com/develop/zimi/favicon.ico",
+        "encoding": "utf-8",
+        "is_default": false
+    }
+  }
+}
