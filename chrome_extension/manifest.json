@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Zimi",
-  "description": "検索エンジンにZimiを追加する拡張です。",
+  "description": "検索エンジンにZimiを追加します。",
   "version": "1.0",
   "chrome_settings_overrides": {
     "search_provider": {
