@@ -1,0 +1,9 @@
+@charset "utf-8";
+
+h1 {
+    font-size: 1em;
+    font-weight: normal;
+}
+#edit_text {
+    font-size: 75px;
+}

@@ -1,10 +1,3 @@
-var text_box = document.getElementById('text_box');
-var ruled_line = document.getElementById('ruled_line');
-var code_panel = document.getElementById('code_panel');
-var font_size = document.getElementById('font_size');
-var font_style = document.getElementById('font_style');
-var canvas = ruled_line.getContext('2d');
-
 var SettingClass = function (font, size) {
     this.font = font;
     this.size = size;
@@ -22,6 +15,7 @@ function changeTextEvent() {
 
     drawRuledLines(text);
     writeHexCode(text);
+    applyToHTML(setting);
 }
 
 function clear() {
@@ -48,24 +42,21 @@ function drawRuledLines(text) {
     ruled_line.width = measure(text);
     ruled_line.height = text_box.clientHeight;
 
+    var len = Math.round(text_box.clientHeight / setting.size);
+    var h = ruled_line.height / len;
     var x_cursor = 0;
     text.split('').forEach(function (val) {
         var c_width = measure(val);
         var x = x_cursor + c_width / 2;
-        drawLine(x, 0, x, ruled_line.height);
-
-        //// one charactor area.
-        // canvas.beginPath();
-        // canvas.strokeStyle = setting.color;
-        // canvas.setLineDash([1, 0]);
-        // canvas.rect(x_cursor, setting.offset_y, c_width, setting.size);
-        // canvas.stroke();
-
+        drawLine(x, 0, x, h);
         x_cursor += c_width;
     });
 
-    var y = ruled_line.height / 2;
-    drawLine(0, y, ruled_line.width, y)
+    for (var l= 1; l <= len;l++) {
+        var y = h * (l - 0.5);
+        drawLine(0, y, ruled_line.width, y)
+    }
+
 }
 
 function measure(str, font, font_size) {
@@ -88,7 +79,7 @@ function writeHexCode(str) {
     if (typeof str != "string") {
         throw "ArgumentError.";
     }
-    var hex_str = "utf-16: "
+    var hex_str = ""
     str.split('').forEach(function (val) {
         hex_str += val.charCodeAt(0).toString(16) + ", ";
     });
@@ -102,6 +93,8 @@ function applyToHTML(setting) {
     code_panel.style.marginTop = (setting.size - 76) + "px"; // 110-76
     text_box.style.fontFamily = setting.font;
     text_box.style.lineHeight = setting.size + "px";
+
+    $('#url_text').val(getUrl());
 }
 
 // src: http://apr20.net/web/jquery/2215/
@@ -127,23 +120,11 @@ function reverse() {
     setting.isReverse = !setting.isReverse;
 }
 
-function copyurl(e) {
+function getUrl() {
     var word = text_box.textContent;
-    var domain = "https://yana.honifuwa.com/develop/zimi/?";
+    var domain = "https://yana.honifuwa.com/zimi/?";
     var url = domain + "s=" + encodeURI(word) + "&f=" + setting.size;
-    try {
-        e.preventDefault();
-        e.clipboardData.setData('text/plain', url);
-    }
-    catch (ex) {
-        console.warn(ex);
-        alert(url);
-    } 
-    console.log("Copy: " + url);
-}
-
-function alldirections() {
-
+    return url;
 }
 
 function changeFontSize() {
@@ -159,28 +140,47 @@ function changeFontStyle() {
     changeTextEvent();
 }
 
-console.log("debug! ('-',,)");
-// console.dir(text_box);
-// console.dir(canvas);
-// console.dirxml(text_box);
-// console.dir(canvas.textBaseline);
-
-document.addEventListener('copy', copyurl);
-
+// main
+var text_box = document.getElementById('text_box');
+var ruled_line = document.getElementById('ruled_line');
+var code_panel = document.getElementById('code_panel');
+var font_size = document.getElementById('font_size');
+var font_style = document.getElementById('font_style');
+var canvas = ruled_line.getContext('2d');
 var setting = new SettingClass('sans-serif', 75);
-// console.dir(setting);
 var args = getUrlVars();
+
+
+// args
+//   s: 本文
+//   f: font-size
 if (args['s'] != null) {
-    text_box.textContent = decodeURI(args['s']);
-}
-if (args['f'] != null) {
-    var tmp_size = parseInt(args['f']);
-    if (40 <= tmp_size && tmp_size <= 200) {
-        setting.size = tmp_size;
-    } else {
-        console.warn("InvalidArguments: " + tmp_size);
+    try {
+        text_box.textContent = decodeURI(args['s']);
+    } catch (e) {
+        console.warn("InvalidArguments: args.s");
     }
 }
-applyToHTML(setting);
-text_box.addEventListener("input", changeTextEvent);
-changeTextEvent();
+if (args['f'] != null) {
+    try {
+        var tmp_size = parseInt(args['f']);
+        if (40 <= tmp_size && tmp_size <= 200) {
+            setting.size = tmp_size;
+        } else {
+            console.warn("OutOfRange.")
+        }
+    }catch (e) {
+        console.warn("InvalidArguments: args.f");
+    }
+}
+
+$(function () {
+    text_box.addEventListener("input", changeTextEvent);
+    var clipboard = new Clipboard('.url_copy_button');
+    clipboard.on('success', function (e) {
+        e.clearSelection();
+    });
+
+    changeTextEvent();
+});
+

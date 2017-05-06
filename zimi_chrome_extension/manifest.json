@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "Zimi",
+  "description": "検索エンジンにZimiを追加します。",
+  "version": "1.0",
+  "chrome_settings_overrides": {
+    "search_provider": {
+        "name": "Zimi(字見)",
+        "keyword": "zimi",
+        "search_url": "https://yana.honifuwa.com/zimi/?s={searchTerms}",
+        "favicon_url": "https://yana.honifuwa.com/zimi/favicon.ico",
+        "encoding": "utf-8",
+        "is_default": false
+    }
+  },
+  "icons": {
+      "16": "red-book_16x16.png",
+      "48": "red-book_48x48.png",
+      "128": "red-book_128x128.png"
+  },
+  "browser_action": {
+      "default_popup": "popup.html"
+  }
+}
