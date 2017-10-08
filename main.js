@@ -149,7 +149,7 @@ var font_style = document.getElementById('font_style');
 var canvas = ruled_line.getContext('2d');
 var setting = new SettingClass('sans-serif', 75);
 var args = getUrlVars();
-
+text_box.focus();
 
 // args
 //   s: 本文

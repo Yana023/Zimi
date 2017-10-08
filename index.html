@@ -1,54 +1,29 @@
 <!DOCTYPE html>
 
-<!-- Zimi v1.5 -->
+<!-- Zimi v2.0 -->
 
 <title>Zimi</title>
 <meta charset='utf-8'>
 <link rel=stylesheet href=style.css>
-<link href="https://fonts.googleapis.com/css?family=Arvo" rel="stylesheet">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/clipboard.js/1.5.3/clipboard.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> -->
 <link rel="shortcut icon" href=favicon.ico>
 
 <div class=header>
     <h1>Zimi</h1>
     <div class=menu>
-        <input id=url_text size=40 type=text value="https://yana.honifuwa.com/zimi">
-        <button class=url_copy_button data-clipboard-target="#url_text" onclick="copyurl()">CopyURL</button>
-        <select id=font_size class=selector onchange="changeFontSize()">
+        <input id=url_text size=120 type=text value="https://yana.honifuwa.com/zimi">
+        <button class=url_copy_button data-clipboard-target="#url_text">CopyURL</button>
+        <select id=font_size class=selector>
             <option value=75>75px</option>
             <option value=100>100px</option>
-            <option value=200>200px</option>
+            <option value=150>150px</option>
         </select>
-        <select id=font_style class=selector onchange="changeFontStyle()">
-            <option value="sans-serif">sans-serif</option>
-            <option value="MS Gothic">MS ゴシック</option>
-            <option value="MSP Gothic">MSP ゴシック</option>
-            <option value="Arial">Arial</option>
-            <option value="Arvo">Arvo</option>
-        </select>
-        <!--<button class=menu-item onclick="reverse()">反転</button>-->
     </div>
 </div>
 
 <div class=box>
-    <div id=text_box contenteditable=true>ほにふわフレンズ！</div>
+    <div id=text_box contenteditable=true></div>
     <canvas id=ruled_line width="304" height="114"></canvas>
 </div>
 
-<div class=stack>
-    <div class=title_panel>utf-16:</div>
-    <div id=code_panel class=content_panel></div>
-</div>
-
-<div class=stack>
-    <div class=title_panel>Note:</div>
-    <div class=content_panel>文字をよく見るためだけの何かです。</div>
-</div>
-
-<div class=stack>
-    <div class=title_panel>Chrome拡張:</div>
-    <div class=content_panel><a href=zimi_chrome_extension.zip>zip</a>※使える人だけどうぞ...</div>
-</div>
-
-<script src=main.js></script>
+<script src=zimi.js></script>
