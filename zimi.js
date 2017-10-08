@@ -104,14 +104,10 @@ function loadArgs() {
 }
 // main
 function main() {
-    // test codes.
-    // console.log("URL: ", document.URL);
-    // console.log("1", url_arg.searchParams.get('s'));
-    // console.log("2", url_arg.searchParams.get('aaa'));
-    // console.log("root.URL:", URL);
     loadArgs();
     initEvents();
     text_box.focus();
+    drawRuledLines(text_box.textContent);
 }
 main();
 //# sourceMappingURL=zimi.js.map
