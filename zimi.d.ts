@@ -1,0 +1,1 @@
+declare function measure(str: string): number;
