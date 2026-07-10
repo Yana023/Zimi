@@ -1,5 +1,6 @@
 import {
   Check,
+  ChevronDown,
   Copy,
   Download,
   Expand,
@@ -7,6 +8,7 @@ import {
   Grid3X3,
   Minimize2,
   RotateCcw,
+  SlidersHorizontal,
   Type,
   X,
 } from 'lucide-react'
@@ -45,6 +47,7 @@ function App() {
   const [viewer, setViewer] = useState<ViewerState>(initialState)
   const [notice, setNotice] = useState('')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(() => window.matchMedia('(min-width: 981px)').matches)
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
   const previewRef = useRef<HTMLElement>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
@@ -76,6 +79,13 @@ function App() {
       window.removeEventListener('beforeinstallprompt', onInstallPrompt)
       window.clearTimeout(noticeTimer.current)
     }
+  }, [])
+
+  useEffect(() => {
+    const wideScreen = window.matchMedia('(min-width: 981px)')
+    const syncOptionsVisibility = () => setOptionsOpen(wideScreen.matches)
+    wideScreen.addEventListener('change', syncOptionsVisibility)
+    return () => wideScreen.removeEventListener('change', syncOptionsVisibility)
   }, [])
 
   const copyShareLink = async () => {
@@ -186,84 +196,111 @@ function App() {
             </div>
           </section>
 
-          <section className="control-section">
-            <div className="control-label-row">
-              <label htmlFor="size">文字の大きさ</label>
-              <output htmlFor="size">{viewer.size}px</output>
-            </div>
-            <input
-              id="size"
-              className="range"
-              type="range"
-              min="64"
-              max="280"
-              step="4"
-              value={viewer.size}
-              onChange={(event) => update('size', Number(event.target.value))}
-            />
-            <div className="range-labels" aria-hidden="true"><span>小さく</span><span>大きく</span></div>
-
-            <div className="control-label-row control-label-spaced">
-              <label htmlFor="spacing">字間</label>
-              <output htmlFor="spacing">{viewer.spacing}px</output>
-            </div>
-            <input
-              id="spacing"
-              className="range"
-              type="range"
-              min="0"
-              max="32"
-              step="2"
-              value={viewer.spacing}
-              onChange={(event) => update('spacing', Number(event.target.value))}
-            />
-          </section>
-
-          <section className="control-section settings-grid">
-            <label className="select-field">
-              <span>書体</span>
-              <select value={viewer.font} onChange={(event) => update('font', event.target.value as ViewerState['font'])}>
-                {FONT_OPTIONS.map((font) => <option value={font.id} key={font.id}>{font.label}</option>)}
-              </select>
-            </label>
-
-            <SegmentedControl<PreviewMode>
-              label="表示"
-              value={viewer.mode}
-              options={[['grid', '一字ずつ'], ['flow', '文章']]}
-              onChange={(value) => update('mode', value)}
-            />
-            <SegmentedControl<Direction>
-              label="方向"
-              value={viewer.direction}
-              options={[['horizontal', '横書き'], ['vertical', '縦書き']]}
-              onChange={(value) => update('direction', value)}
-            />
-            <SegmentedControl<GuideStyle>
-              label="補助線"
-              value={viewer.guide}
-              options={[['full', '方眼'], ['cross', '十字'], ['none', 'なし']]}
-              onChange={(value) => update('guide', value)}
-            />
-
-            <label className="switch-row">
-              <span>
-                <strong>左右反転</strong>
-                <small>裏側から見た形を確認</small>
+          <details
+            className="options-disclosure"
+            open={optionsOpen}
+            onToggle={(event) => setOptionsOpen(event.currentTarget.open)}
+          >
+            <summary>
+              <span className="options-summary-title">
+                <SlidersHorizontal size={17} />
+                表示オプション
               </span>
-              <input
-                type="checkbox"
-                role="switch"
-                checked={viewer.mirrored}
-                onChange={(event) => update('mirrored', event.target.checked)}
-              />
-            </label>
-          </section>
+              <span className="options-summary-value">
+                {viewer.size}px · {FONT_OPTIONS.find((font) => font.id === viewer.font)?.label}
+              </span>
+              <ChevronDown className="options-chevron" size={18} aria-hidden="true" />
+            </summary>
 
-          <button className="reset-button" type="button" onClick={reset}>
-            <RotateCcw size={15} />
-            設定を初期化
-          </button>
+            <div className="options-content">
+              <section className="control-section">
+                <div className="control-label-row">
+                  <label htmlFor="size">文字の大きさ</label>
+                  <output htmlFor="size">{viewer.size}px</output>
+                </div>
+                <input
+                  id="size"
+                  className="range"
+                  type="range"
+                  min="64"
+                  max="280"
+                  step="4"
+                  value={viewer.size}
+                  onChange={(event) => update('size', Number(event.target.value))}
+                />
+                <div className="range-labels" aria-hidden="true">
+                  <span>小さく</span>
+                  <span>大きく</span>
+                </div>
+
+                <div className="control-label-row control-label-spaced">
+                  <label htmlFor="spacing">字間</label>
+                  <output htmlFor="spacing">{viewer.spacing}px</output>
+                </div>
+                <input
+                  id="spacing"
+                  className="range"
+                  type="range"
+                  min="0"
+                  max="32"
+                  step="2"
+                  value={viewer.spacing}
+                  onChange={(event) => update('spacing', Number(event.target.value))}
+                />
+              </section>
+
+              <section className="control-section settings-grid">
+                <label className="select-field">
+                  <span>書体</span>
+                  <select
+                    value={viewer.font}
+                    onChange={(event) => update('font', event.target.value as ViewerState['font'])}
+                  >
+                    {FONT_OPTIONS.map((font) => (
+                      <option value={font.id} key={font.id}>{font.label}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <SegmentedControl<PreviewMode>
+                  label="表示"
+                  value={viewer.mode}
+                  options={[['grid', '一字ずつ'], ['flow', '文章']]}
+                  onChange={(value) => update('mode', value)}
+                />
+                <SegmentedControl<Direction>
+                  label="方向"
+                  value={viewer.direction}
+                  options={[['horizontal', '横書き'], ['vertical', '縦書き']]}
+                  onChange={(value) => update('direction', value)}
+                />
+                <SegmentedControl<GuideStyle>
+                  label="補助線"
+                  value={viewer.guide}
+                  options={[['full', '方眼'], ['cross', '十字'], ['none', 'なし']]}
+                  onChange={(value) => update('guide', value)}
+                />
+
+                <label className="switch-row">
+                  <span>
+                    <strong>左右反転</strong>
+                    <small>裏側から見た形を確認</small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={viewer.mirrored}
+                    onChange={(event) => update('mirrored', event.target.checked)}
+                  />
+                </label>
+              </section>
+
+              <button className="reset-button" type="button" onClick={reset}>
+                <RotateCcw size={15} />
+                設定を初期化
+              </button>
+            </div>
+          </details>
         </aside>
 
         <Preview
