@@ -85,6 +85,15 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const clearTextWithEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.isComposing || document.fullscreenElement) return
+      setViewer((current) => current.text ? { ...current, text: '' } : current)
+    }
+    window.addEventListener('keydown', clearTextWithEscape)
+    return () => window.removeEventListener('keydown', clearTextWithEscape)
+  }, [])
+
+  useEffect(() => {
     const wideScreen = window.matchMedia('(min-width: 981px)')
     const syncOptionsVisibility = () => setOptionsOpen(wideScreen.matches)
     wideScreen.addEventListener('change', syncOptionsVisibility)
@@ -181,7 +190,7 @@ function App() {
                   className="icon-button clear-button"
                   type="button"
                   aria-label="入力を消去"
-                  title="入力を消去"
+                  title="入力を消去（Esc）"
                   onClick={() => update('text', '')}
                 >
                   <X size={17} />

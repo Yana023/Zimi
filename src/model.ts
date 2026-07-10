@@ -46,7 +46,7 @@ export const DEFAULT_STATE: ViewerState = {
   font: 'sans',
   mode: 'grid',
   direction: 'horizontal',
-  guide: 'full',
+  guide: 'cross',
   mirrored: false,
 }
 

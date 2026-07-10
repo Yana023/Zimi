@@ -18,8 +18,9 @@ describe('segmentGraphemes', () => {
 })
 
 describe('default viewer state', () => {
-  it('starts with 字 in the text area', () => {
+  it('starts with 字 and cross guides', () => {
     expect(DEFAULT_STATE.text).toBe('字')
+    expect(DEFAULT_STATE.guide).toBe('cross')
   })
 })
 
