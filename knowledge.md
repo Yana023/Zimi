@@ -1,0 +1,95 @@
+# Zimi 実装メモ
+
+## 2026-07-11 現状調査
+
+旧版は2017年に作られたHTML / CSS / TypeScriptの単一ページ実装だった。
+`contenteditable` の表示位置とCanvasの罫線を固定座標で重ね、文字幅を都度計測する構成で、次の問題があった。
+
+- 画面幅に応じたレイアウトがなく、スマートフォンで利用しづらい。
+- 改行、空行、結合絵文字などを文字単位で安定して扱えない。
+- `document.execCommand('copy')` など、現在は非推奨のAPIに依存している。
+- 状態保存、オフライン動作、アクセシビリティ、テスト、ビルド手順がない。
+- Chrome拡張はManifest V2で、ポップアップ側の動作も未完成だった。
+
+## 技術選定
+
+React + TypeScript + ViteのPWAへ置き換えた。
+
+- Web標準を利用するPWAなら、Windows / macOS / Linux / ChromeOS / iOS / Androidを同じ実装でカバーできる。
+- ネイティブアプリ用のビルド環境やストア配布を必須にせず、URLを開くだけでも利用できる。
+- 静的ファイルだけで配布でき、旧版と同じホスティング方式を維持できる。
+- Vite公式のReact構成と `vite-plugin-pwa` の生成型Service Workerを使い、依存を小さく保つ。
+
+パッケージは2026-07-11時点のnpm最新版を確認して選定した。Vite公式ドキュメント上、Vite 8はNode.js 20.19以上が必要。
+
+## 字形確認の実装
+
+Canvasで文字幅を推測する方式を廃止し、1文字ごとに正方形のDOMセルを作る方式にした。
+
+- `Intl.Segmenter` のgrapheme単位で分割し、サロゲートペアや結合絵文字を1文字として扱う。
+- 各セルを正方形に固定し、中心線と対角線をCSSグラデーションで描く。
+- 文字はセル中央に配置し、中心、四辺の余白、傾きを比較しやすくした。
+- 入力改行を横書きでは行、縦書きでは右から左へ並ぶ列として扱う。
+- 文章モードでは分割せず、実際の行の流れと字間を確認できる。
+- 左右反転はセルの罫線ではなく文字だけに適用し、基準線の位置を維持する。
+
+## データと互換性
+
+- 入力と設定は `localStorage` の `zimi:viewer-state` に保存する。サーバーへの送信は行わない。
+- 共有操作時だけ、設定をURLクエリへ変換してクリップボードへ書き込む。
+- 旧版の `s`（本文）と `f`（文字サイズ）を読み込める。
+- URL値と保存値は読み込み時に型・列挙値・範囲を検証する。
+- 入力は画面負荷と共有URL長を考慮し240文字に制限する。
+
+## 配布
+
+Viteの `base`、マニフェストの `start_url` / `scope`、アイコン参照を相対パスにした。
+これにより `/` だけでなく `/zimi/` やGitHub Pagesのリポジトリ配下でも同じ `dist/` を配置できる。
+外部Webフォントは使わず、オフライン時も見た目と機能がネットワークに依存しないようにした。
+
+## 検証記録
+
+- `npm run build`: TypeScript strictモードとVite本番ビルド成功。
+- `npm test`: 文字分割、旧URL互換、不正値補正、共有URL往復の4テスト成功。
+- デスクトップ幅1440pxで入力、複数行、縦書き、書体、補助線、左右反転を操作確認。
+- モバイル幅390pxで横方向オーバーフローがないことを確認。
+- ブラウザのconsole warning / errorがないことを確認。
+
+## 今後の拡張候補
+
+- ユーザーが用意したフォントファイルの一時読み込み
+- プレビューのPNG / PDF書き出し
+- 複数の書体を横並びで比較するモード
+
+## 2026-07-11 アイコン更新
+
+画像生成機能を使い、「字」の文字を虫眼鏡で観察する構図のマスター画像を生成した。
+既存UIのコーラル、生成り、墨色、淡い方眼の配色を維持し、小さい表示でも用途が伝わるようにした。
+
+- マスター: `assets/icon-source/zimi-master.png`（1254×1254）
+- 通常PWA: `public/zimi-192.png`、`public/zimi-512.png`
+- マスカブルPWA: `public/zimi-maskable-512.png`
+- Apple Touch Icon: `public/apple-touch-icon.png`
+- ブラウザfavicon: `public/favicon.png`
+
+マスカブル版は、OS側の円形・角丸クロップで虫眼鏡が欠けないよう全体を中央80%以内へ縮小し、外周をブランドカラーで埋めた。
+ヘッダーのブランドマークも同じ画像へ差し替え、Web画面とインストール後のアイコンを統一した。
+
+## 2026-07-11 GitHub Pages対応
+
+GitHub公式のPages artifact方式で自動デプロイするWorkflowを追加した。
+
+- 対象: `master` ブランチへのpush、または手動実行
+- 処理: `npm ci` → `npm test` → `npm run build` → Pages artifact upload → deploy
+- 権限: `contents: read`、`pages: write`、`id-token: write` の必要最小限
+- 公開先: `https://yana023.github.io/Zimi/`
+
+Project Pagesではリポジトリ名を含む `/Zimi/` がベースパスになる。
+Workflowの `github.event.repository.name` から `BASE_PATH` を作り、Vite設定へ渡すことで、リポジトリ名のハードコードを避けた。
+ローカルビルドと一般的な静的ホスティングでは従来どおり相対パス `./` を使う。
+
+初回公開前に、GitHubのリポジトリ設定で **Settings → Pages → Source: GitHub Actions** を選択する必要がある。
+
+## Authors表記
+
+`package.json`、README、アプリのフッターに `Yana023` と `gpt5.6sol` を記載した。

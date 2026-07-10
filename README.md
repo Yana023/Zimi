@@ -1,0 +1,90 @@
+# Zimi
+
+入力した文字を大きく表示し、方眼を使って字形のバランスを確認するWebアプリです。
+インストール可能なPWAとして動作するため、1つのコードベースでパソコン・スマートフォン・タブレットに対応します。
+
+## 主な機能
+
+- 64〜280pxの拡大表示と字間調整
+- 文字ごとの正方形表示と、文章としての連続表示
+- 中心線・対角線・枠による字形バランスの確認
+- 横書き・縦書き、ゴシック・明朝・丸ゴシックの切り替え
+- 左右反転とプレビューの全画面表示
+- 入力内容と表示設定の端末内保存
+- 表示設定を再現できる共有リンク
+- オフライン動作とホーム画面へのインストール
+- 旧版の共有URL（`?s=文字&f=150`）との互換性
+
+## 対応環境
+
+現在のChrome、Edge、Firefox、Safariを対象にしています。
+Windows、macOS、Linux、ChromeOS、iOS/iPadOS、Androidで利用できます。
+
+## 開発環境で使う
+
+Node.js 20.19以上を用意し、リポジトリ直下で次を実行します。
+
+```bash
+npm install
+npm run dev
+```
+
+表示されたURL（通常は <http://localhost:5173>）をブラウザで開きます。
+
+## テストとビルド
+
+```bash
+# ユニットテスト
+npm test
+
+# 型チェックを含む本番ビルド
+npm run build
+
+# ビルド結果をローカルで確認
+npm run preview
+```
+
+本番用ファイルは `dist/` に生成されます。静的ホスティングへそのまま配置できます。
+相対パスでビルドするため、ドメイン直下だけでなく `/zimi/` のようなサブディレクトリにも配置できます。
+PWAのインストールとオフライン機能を有効にするには、公開先をHTTPSにしてください。
+
+## GitHub Pagesへ公開する
+
+このリポジトリには [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml) が含まれています。
+`master` ブランチへpushすると、テストと本番ビルドの成功後にGitHub Pagesへ自動公開されます。
+
+初回だけGitHub上で次の設定を行います。
+
+1. リポジトリの **Settings** → **Pages** を開く。
+2. **Build and deployment** の **Source** で **GitHub Actions** を選択する。
+3. この変更を `master` ブランチへpushする。
+
+公開先は <https://yana023.github.io/Zimi/> です。
+以降は `master` へのpushごとに更新されます。GitHubの **Actions** → **Deploy to GitHub Pages** → **Run workflow** から手動実行もできます。
+
+Workflowではリポジトリ名から公開ベースパスを自動生成するため、リポジトリ名を変更しても設定ファイルの修正は不要です。
+
+## アプリとしてインストールする
+
+- Chrome / Edge / Android: アドレスバーまたはブラウザメニューの「インストール」を選択します。
+- iPhone / iPad: Safariの共有メニューから「ホーム画面に追加」を選択します。
+- インストールしなくても、通常のWebページとして全機能を利用できます。
+
+## 構成
+
+- `src/App.tsx`: 画面と操作
+- `src/model.ts`: 文字分割、設定、共有URL、保存データの処理
+- `src/styles.css`: レスポンシブ表示と方眼の描画
+- `vite.config.ts`: ビルドとPWA設定
+- `.github/workflows/deploy-pages.yml`: GitHub Pagesへの自動公開
+- `public/`: PWAアイコン
+- `knowledge.md`: 調査結果と実装上の判断
+
+## ライセンス
+
+[LICENSE](./LICENSE) を参照してください。
+
+## Authors
+
+- Yana023
+- gpt5.6sol
