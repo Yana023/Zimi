@@ -277,7 +277,7 @@ function App() {
                 <SegmentedControl<GuideStyle>
                   label="補助線"
                   value={viewer.guide}
-                  options={[['full', '方眼'], ['cross', '十字'], ['none', 'なし']]}
+                  options={[['cross', '十字'], ['full', 'ライン'], ['none', 'なし']]}
                   onChange={(value) => update('guide', value)}
                 />
 
@@ -408,7 +408,7 @@ function Preview({ viewer, count, previewRef, isFullscreen, onToggleFullscreen }
       </div>
       <div className="preview-hint">
         <Grid3X3 size={15} />
-        方眼の交点を基準に、文字の中心・余白・傾きを確認できます
+        補助線の交点を基準に、文字の中心・余白・傾きを確認できます
       </div>
     </section>
   )

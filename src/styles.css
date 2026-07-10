@@ -628,11 +628,19 @@ select {
   pointer-events: none;
 }
 
-.character-cell.guide-full::before,
-.character-cell.guide-cross::before {
+.character-cell.guide-full::before {
   background:
     linear-gradient(to right, transparent calc(50% - 0.5px), #e6a79d calc(50% - 0.5px), #e6a79d calc(50% + 0.5px), transparent calc(50% + 0.5px)),
     linear-gradient(to bottom, transparent calc(50% - 0.5px), #e6a79d calc(50% - 0.5px), #e6a79d calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+
+.character-cell.guide-cross::before {
+  background-image:
+    radial-gradient(circle at center, #dca097 1.2px, transparent 1.4px),
+    radial-gradient(circle at center, #dca097 1.2px, transparent 1.4px);
+  background-position: center top, left center;
+  background-repeat: repeat-y, repeat-x;
+  background-size: 3px 8px, 8px 3px;
 }
 
 .character-cell.guide-full::after {
@@ -685,11 +693,19 @@ select {
   transform-origin: center;
 }
 
-.flow-preview.guide-full,
-.flow-preview.guide-cross {
+.flow-preview.guide-full {
   background-image:
     linear-gradient(to right, transparent calc(50% - 0.5px), #e6a79d calc(50% - 0.5px), #e6a79d calc(50% + 0.5px), transparent calc(50% + 0.5px)),
     linear-gradient(to bottom, transparent calc(50% - 0.5px), #e6a79d calc(50% - 0.5px), #e6a79d calc(50% + 0.5px), transparent calc(50% + 0.5px));
+}
+
+.flow-preview.guide-cross {
+  background-image:
+    radial-gradient(circle at center, #dca097 1.2px, transparent 1.4px),
+    radial-gradient(circle at center, #dca097 1.2px, transparent 1.4px);
+  background-position: center top, left center;
+  background-repeat: repeat-y, repeat-x;
+  background-size: 3px 8px, 8px 3px;
 }
 
 .direction-vertical .flow-preview {
