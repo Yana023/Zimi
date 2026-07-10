@@ -26,6 +26,8 @@ export type PreviewMode = 'grid' | 'flow'
 export type Direction = 'horizontal' | 'vertical'
 export type GuideStyle = 'full' | 'cross' | 'none'
 
+export const MAX_CHARACTERS = 240
+
 export interface ViewerState {
   text: string
   size: number
@@ -38,7 +40,7 @@ export interface ViewerState {
 }
 
 export const DEFAULT_STATE: ViewerState = {
-  text: '永',
+  text: '字',
   size: 168,
   spacing: 8,
   font: 'sans',
@@ -71,7 +73,33 @@ export function segmentGraphemes(text: string): string[] {
 }
 
 export function countCharacters(text: string): number {
-  return segmentGraphemes(text.replace(/\r?\n/g, '')).length
+  return segmentGraphemes(text.replace(/\r\n?|\n/g, '')).length
+}
+
+export function limitText(text: string, maxCharacters = MAX_CHARACTERS): string {
+  const normalized = text.replace(/\r\n?/g, '\n')
+  let characters = 0
+  let lineBreaks = 0
+  let limited = ''
+
+  for (const grapheme of segmentGraphemes(normalized)) {
+    if (grapheme === '\n') {
+      if (lineBreaks < maxCharacters) {
+        limited += grapheme
+        lineBreaks += 1
+      }
+      continue
+    }
+    if (characters >= maxCharacters) break
+    limited += grapheme
+    characters += 1
+  }
+
+  return limited
+}
+
+export function resetViewerSettings(current: ViewerState): ViewerState {
+  return { ...DEFAULT_STATE, text: current.text }
 }
 
 export function stateFromSearch(
@@ -85,7 +113,7 @@ export function stateFromSearch(
   const font = params.get('font') as FontId | null
 
   return {
-    text: (params.get('s') ?? fallback.text).slice(0, 240),
+    text: limitText(params.get('s') ?? fallback.text),
     // `f` is kept for links created by Zimi v2.
     size: clamp(Math.round(finiteNumber(params.get('size') ?? params.get('f'), fallback.size)), 64, 280),
     spacing: clamp(Math.round(finiteNumber(params.get('spacing'), fallback.spacing)), 0, 32),

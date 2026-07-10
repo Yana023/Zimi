@@ -16,10 +16,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import {
   DEFAULT_STATE,
   FONT_OPTIONS,
+  MAX_CHARACTERS,
   buildShareUrl,
   countCharacters,
   fontFamily,
+  limitText,
   readStoredState,
+  resetViewerSettings,
   segmentGraphemes,
   stateFromSearch,
   type Direction,
@@ -33,7 +36,7 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
-const examples = ['字', '𰻞𰻞麺', '春夏秋冬']
+const examples = ['字', '𰻞𰻞麺', '春夏秋冬', 'さち']
 
 function initialState(): ViewerState {
   const stored = readStoredState(window.localStorage)
@@ -119,8 +122,8 @@ function App() {
   }
 
   const reset = () => {
-    setViewer(DEFAULT_STATE)
-    showNotice('表示設定を初期状態に戻しました')
+    setViewer((current) => resetViewerSettings(current))
+    showNotice('入力文字を残して、表示設定を初期状態に戻しました')
   }
 
   const count = useMemo(() => countCharacters(viewer.text), [viewer.text])
@@ -162,17 +165,16 @@ function App() {
                 <p className="eyebrow">INPUT</p>
                 <h1>見たい文字</h1>
               </div>
-              <span className="count">{count} / 240</span>
+              <span className="count">{count} / {MAX_CHARACTERS}</span>
             </div>
             <div className="textarea-wrap">
               <textarea
                 value={viewer.text}
-                maxLength={240}
                 rows={3}
                 aria-label="拡大して見たい文字"
                 placeholder="文字を入力してください"
                 autoFocus
-                onChange={(event) => update('text', event.target.value)}
+                onChange={(event) => update('text', limitText(event.target.value))}
               />
               {viewer.text && (
                 <button

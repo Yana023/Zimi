@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_STATE,
+  MAX_CHARACTERS,
   buildShareUrl,
   countCharacters,
+  limitText,
+  resetViewerSettings,
   segmentGraphemes,
   stateFromSearch,
 } from './model'
@@ -11,6 +14,36 @@ describe('segmentGraphemes', () => {
   it('counts joined emoji and Japanese characters as visible characters', () => {
     expect(segmentGraphemes('永👨‍👩‍👧‍👦あ')).toEqual(['永', '👨‍👩‍👧‍👦', 'あ'])
     expect(countCharacters('永\nあ')).toBe(2)
+  })
+})
+
+describe('default viewer state', () => {
+  it('starts with 字 in the text area', () => {
+    expect(DEFAULT_STATE.text).toBe('字')
+  })
+})
+
+describe('text input', () => {
+  it('allows 240 supplementary-plane characters', () => {
+    const text = limitText('𰻞'.repeat(MAX_CHARACTERS + 1))
+    expect(countCharacters(text)).toBe(MAX_CHARACTERS)
+    expect(text).toBe('𰻞'.repeat(MAX_CHARACTERS))
+  })
+
+  it('preserves line breaks without counting them as visible characters', () => {
+    const text = limitText('春\n夏\n\n秋\n冬')
+    expect(text).toBe('春\n夏\n\n秋\n冬')
+    expect(countCharacters(text)).toBe(4)
+  })
+
+  it('resets display settings without clearing the entered text', () => {
+    const reset = resetViewerSettings({
+      ...DEFAULT_STATE,
+      text: '残す文字',
+      size: 280,
+      mirrored: true,
+    })
+    expect(reset).toEqual({ ...DEFAULT_STATE, text: '残す文字' })
   })
 })
 

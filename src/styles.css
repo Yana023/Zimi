@@ -671,7 +671,7 @@ select {
 .empty-line {
   display: block;
   width: var(--character-size);
-  height: calc(var(--character-size) * 0.2);
+  height: var(--character-size);
   flex: 0 0 auto;
 }
 
