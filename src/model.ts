@@ -1,3 +1,5 @@
+const SYSTEM_FONT_FAMILY = 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif'
+
 export const FONT_OPTIONS = [
   {
     id: 'gothic',
@@ -17,7 +19,12 @@ export const FONT_OPTIONS = [
   {
     id: 'sans',
     label: '端末の標準',
-    family: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    family: SYSTEM_FONT_FAMILY,
+  },
+  {
+    id: 'custom',
+    label: 'ユーザー指定',
+    family: SYSTEM_FONT_FAMILY,
   },
 ] as const
 
@@ -27,9 +34,11 @@ export type Direction = 'horizontal' | 'vertical'
 export type GuideStyle = 'full' | 'cross' | 'none'
 
 export const MAX_CHARACTERS = 240
+export const MAX_FONT_NAME_LENGTH = 100
 
 export interface ViewerState {
   text: string
+  customFont: string
   size: number
   spacing: number
   font: FontId
@@ -41,6 +50,7 @@ export interface ViewerState {
 
 export const DEFAULT_STATE: ViewerState = {
   text: '字',
+  customFont: '',
   size: 168,
   spacing: 8,
   font: 'sans',
@@ -98,6 +108,11 @@ export function limitText(text: string, maxCharacters = MAX_CHARACTERS): string 
   return limited
 }
 
+export function limitFontName(fontName: string): string {
+  const printable = fontName.replace(/[\u0000-\u001f\u007f]/g, '')
+  return segmentGraphemes(printable).slice(0, MAX_FONT_NAME_LENGTH).join('')
+}
+
 export function resetViewerSettings(current: ViewerState): ViewerState {
   return { ...DEFAULT_STATE, text: current.text }
 }
@@ -114,6 +129,7 @@ export function stateFromSearch(
 
   return {
     text: limitText(params.get('s') ?? fallback.text),
+    customFont: limitFontName(params.get('customFont') ?? fallback.customFont),
     // `f` is kept for links created by Zimi v2.
     size: clamp(Math.round(finiteNumber(params.get('size') ?? params.get('f'), fallback.size)), 64, 280),
     spacing: clamp(Math.round(finiteNumber(params.get('spacing'), fallback.spacing)), 0, 32),
@@ -133,6 +149,9 @@ export function buildShareUrl(state: ViewerState, currentUrl: string): string {
   url.searchParams.set('size', String(state.size))
   url.searchParams.set('spacing', String(state.spacing))
   url.searchParams.set('font', state.font)
+  if (state.font === 'custom' && state.customFont.trim()) {
+    url.searchParams.set('customFont', state.customFont)
+  }
   url.searchParams.set('mode', state.mode)
   url.searchParams.set('direction', state.direction)
   url.searchParams.set('guide', state.guide)
@@ -147,6 +166,7 @@ export function readStoredState(storage: Pick<Storage, 'getItem'>): ViewerState 
     const parsed = JSON.parse(stored) as Partial<ViewerState>
     const search = new URLSearchParams()
     if (typeof parsed.text === 'string') search.set('s', parsed.text)
+    if (typeof parsed.customFont === 'string') search.set('customFont', parsed.customFont)
     if (typeof parsed.size === 'number') search.set('size', String(parsed.size))
     if (typeof parsed.spacing === 'number') search.set('spacing', String(parsed.spacing))
     if (typeof parsed.font === 'string') search.set('font', parsed.font)
@@ -160,6 +180,14 @@ export function readStoredState(storage: Pick<Storage, 'getItem'>): ViewerState 
   }
 }
 
-export function fontFamily(fontId: FontId): string {
+export function fontFamily(fontId: FontId, customFont = ''): string {
+  if (fontId === 'custom') {
+    const name = limitFontName(customFont).trim()
+    if (name) {
+      const escaped = name.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+      return `"${escaped}", ${SYSTEM_FONT_FAMILY}`
+    }
+    return SYSTEM_FONT_FAMILY
+  }
   return FONT_OPTIONS.find((font) => font.id === fontId)?.family ?? FONT_OPTIONS[0].family
 }

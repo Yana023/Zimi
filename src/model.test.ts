@@ -4,6 +4,8 @@ import {
   MAX_CHARACTERS,
   buildShareUrl,
   countCharacters,
+  fontFamily,
+  limitFontName,
   limitText,
   resetViewerSettings,
   segmentGraphemes,
@@ -41,10 +43,27 @@ describe('text input', () => {
     const reset = resetViewerSettings({
       ...DEFAULT_STATE,
       text: '残す文字',
+      customFont: 'BIZ UDP明朝',
+      font: 'custom',
       size: 280,
       mirrored: true,
     })
     expect(reset).toEqual({ ...DEFAULT_STATE, text: '残す文字' })
+  })
+})
+
+describe('custom fonts', () => {
+  it('limits font names and removes control characters', () => {
+    expect(limitFontName(`  BIZ\nUDP明朝\u0000  `)).toBe('  BIZUDP明朝  ')
+  })
+
+  it('quotes custom family names and keeps a system fallback', () => {
+    expect(fontFamily('custom', 'My "Font"')).toBe(
+      '"My \\"Font\\"", system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    )
+    expect(fontFamily('custom', '')).toBe(
+      'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    )
   })
 })
 
@@ -78,5 +97,15 @@ describe('share links', () => {
     const parsed = stateFromSearch(new URL(url).search)
     expect(parsed).toEqual(expected)
     expect(new URL(url).hash).toBe('')
+  })
+
+  it('round-trips a user-specified font family', () => {
+    const expected = {
+      ...DEFAULT_STATE,
+      font: 'custom' as const,
+      customFont: 'BIZ UDP明朝',
+    }
+    const url = buildShareUrl(expected, 'https://example.com/zimi')
+    expect(stateFromSearch(new URL(url).search)).toEqual(expected)
   })
 })

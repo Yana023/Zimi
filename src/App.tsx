@@ -8,6 +8,7 @@ import {
   Grid3X3,
   Minimize2,
   RotateCcw,
+  Search,
   SlidersHorizontal,
   Type,
   X,
@@ -17,9 +18,11 @@ import {
   DEFAULT_STATE,
   FONT_OPTIONS,
   MAX_CHARACTERS,
+  MAX_FONT_NAME_LENGTH,
   buildShareUrl,
   countCharacters,
   fontFamily,
+  limitFontName,
   limitText,
   readStoredState,
   resetViewerSettings,
@@ -36,12 +39,20 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
+interface LocalFontData {
+  family: string
+}
+
+interface LocalFontWindow extends Window {
+  queryLocalFonts?: () => Promise<LocalFontData[]>
+}
+
 const examples = ['字', '𰻞𰻞麺', '春夏秋冬', 'さち', '𱁬']
 
 function initialState(): ViewerState {
   const stored = readStoredState(window.localStorage)
   const params = new URLSearchParams(window.location.search)
-  const sharedKeys = ['s', 'f', 'size', 'spacing', 'font', 'mode', 'direction', 'guide', 'mirror']
+  const sharedKeys = ['s', 'f', 'size', 'spacing', 'font', 'customFont', 'mode', 'direction', 'guide', 'mirror']
   const hasSharedState = sharedKeys.some((key) => params.has(key))
   return hasSharedState ? stateFromSearch(window.location.search, stored) : stored
 }
@@ -52,8 +63,11 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [optionsOpen, setOptionsOpen] = useState(() => window.matchMedia('(min-width: 981px)').matches)
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
+  const [localFontFamilies, setLocalFontFamilies] = useState<string[]>([])
+  const [fontsLoading, setFontsLoading] = useState(false)
   const previewRef = useRef<HTMLElement>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
+  const supportsLocalFontAccess = typeof (window as LocalFontWindow).queryLocalFonts === 'function'
 
   const update = <Key extends keyof ViewerState>(key: Key, value: ViewerState[Key]) => {
     setViewer((current) => ({ ...current, [key]: value }))
@@ -128,6 +142,32 @@ function App() {
     const choice = await installPrompt.userChoice
     if (choice.outcome === 'accepted') showNotice('Zimiをインストールしました')
     setInstallPrompt(null)
+  }
+
+  const loadLocalFonts = async () => {
+    const fontWindow = window as LocalFontWindow
+    if (!fontWindow.queryLocalFonts) {
+      showNotice('このブラウザでは一覧取得に対応していません。フォント名を入力してください')
+      return
+    }
+
+    setFontsLoading(true)
+    try {
+      const fonts = await fontWindow.queryLocalFonts()
+      const families = Array.from(new Set(
+        fonts.map(({ family }) => limitFontName(family).trim()).filter(Boolean),
+      )).sort((left, right) => left.localeCompare(right, 'ja'))
+      setLocalFontFamilies(families)
+      showNotice(families.length
+        ? `${families.length}件のフォントを読み込みました`
+        : '利用できるフォントが見つかりませんでした')
+    } catch (error) {
+      showNotice(error instanceof DOMException && error.name === 'NotAllowedError'
+        ? '端末フォントの読み込みが許可されませんでした'
+        : '端末フォントを読み込めませんでした')
+    } finally {
+      setFontsLoading(false)
+    }
   }
 
   const reset = () => {
@@ -218,7 +258,9 @@ function App() {
                 表示オプション
               </span>
               <span className="options-summary-value">
-                {viewer.size}px · {FONT_OPTIONS.find((font) => font.id === viewer.font)?.label}
+                {viewer.size}px · {viewer.font === 'custom'
+                  ? viewer.customFont.trim() || 'ユーザー指定'
+                  : FONT_OPTIONS.find((font) => font.id === viewer.font)?.label}
               </span>
               <ChevronDown className="options-chevron" size={18} aria-hidden="true" />
             </summary>
@@ -272,6 +314,49 @@ function App() {
                     ))}
                   </select>
                 </label>
+
+                {viewer.font === 'custom' && (
+                  <div className="custom-font-settings">
+                    <label htmlFor="custom-font">フォント名</label>
+                    <div className="custom-font-controls">
+                      <input
+                        id="custom-font"
+                        type="text"
+                        value={viewer.customFont}
+                        list={localFontFamilies.length ? 'local-font-families' : undefined}
+                        maxLength={MAX_FONT_NAME_LENGTH}
+                        placeholder="例: BIZ UDP明朝"
+                        autoComplete="off"
+                        spellCheck={false}
+                        aria-describedby="custom-font-help"
+                        onChange={(event) => update('customFont', limitFontName(event.target.value))}
+                      />
+                      <button
+                        className="local-font-button"
+                        type="button"
+                        disabled={!supportsLocalFontAccess || fontsLoading}
+                        onClick={loadLocalFonts}
+                      >
+                        <Search size={14} />
+                        {fontsLoading
+                          ? '読み込み中'
+                          : localFontFamilies.length
+                            ? `${localFontFamilies.length}件`
+                            : supportsLocalFontAccess ? '端末から検索' : '一覧取得非対応'}
+                      </button>
+                    </div>
+                    <small id="custom-font-help">
+                      {supportsLocalFontAccess
+                        ? '名前を直接入力するか、端末フォントを読み込んで候補から選べます'
+                        : 'このブラウザでは、端末に入っているフォントの名前を直接入力してください'}
+                    </small>
+                    {localFontFamilies.length > 0 && (
+                      <datalist id="local-font-families">
+                        {localFontFamilies.map((family) => <option value={family} key={family} />)}
+                      </datalist>
+                    )}
+                  </div>
+                )}
 
                 <SegmentedControl<PreviewMode>
                   label="表示"
@@ -370,7 +455,7 @@ interface PreviewProps {
 }
 
 function Preview({ viewer, count, previewRef, isFullscreen, onToggleFullscreen }: PreviewProps) {
-  const family = fontFamily(viewer.font)
+  const family = fontFamily(viewer.font, viewer.customFont)
   const stageStyle = {
     '--character-size': `${viewer.size}px`,
     '--character-gap': `${viewer.spacing}px`,
