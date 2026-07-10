@@ -41,7 +41,7 @@ export const DEFAULT_STATE: ViewerState = {
   text: '永',
   size: 168,
   spacing: 8,
-  font: 'gothic',
+  font: 'sans',
   mode: 'grid',
   direction: 'horizontal',
   guide: 'full',
