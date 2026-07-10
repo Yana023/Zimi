@@ -946,6 +946,24 @@ footer {
   letter-spacing: 0.04em;
 }
 
+.footer-project,
+.footer-project a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.footer-project a {
+  gap: 4px;
+  color: var(--muted);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.footer-project a:hover {
+  color: var(--accent-dark);
+}
+
 .toast {
   position: fixed;
   z-index: 100;

@@ -5,6 +5,7 @@ import {
   Download,
   Expand,
   Eye,
+  GitFork,
   Grid3X3,
   Minimize2,
   RotateCcw,
@@ -409,7 +410,18 @@ function App() {
       </main>
 
       <footer>
-        <span>Zimi v3 · Yana023 &amp; gpt5.6sol</span>
+        <span className="footer-project">
+          <span>Zimi v3 · Yana023 &amp; gpt5.6sol</span>
+          <a
+            href="https://github.com/Yana023/Zimi"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="ZimiのGitHubリポジトリ"
+          >
+            <GitFork size={12} />
+            GitHub
+          </a>
+        </span>
         <span>入力内容はこの端末内に保存されます</span>
       </footer>
       <div className={`toast ${notice ? 'toast-visible' : ''}`} role="status" aria-live="polite">
