@@ -36,7 +36,7 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
-const examples = ['字', '𰻞𰻞麺', '春夏秋冬', 'さち']
+const examples = ['字', '𰻞𰻞麺', '春夏秋冬', 'さち', '𪚥']
 
 function initialState(): ViewerState {
   const stored = readStoredState(window.localStorage)
